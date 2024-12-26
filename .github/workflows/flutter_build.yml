@@ -1,0 +1,54 @@
+name: Flutter Build
+
+on:
+  push:
+    branches:
+      - master  # Jalankan workflow saat ada push ke branch `master`
+  pull_request:
+    branches:
+      - master  # Jalankan workflow untuk pull request ke branch `master`
+
+jobs:
+  build:
+    name: Build Flutter App
+    runs-on: ubuntu-latest  # Gunakan runner Ubuntu
+
+    strategy:
+      matrix:
+        platform: [android, ios, windows]  # Platform yang akan dibangun
+
+    steps:
+      # Langkah 1: Checkout kode
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Langkah 2: Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'  # Versi Flutter stable
+
+      # Langkah 3: Install dependencies
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # Langkah 4: Build berdasarkan platform
+      - name: Build for ${{ matrix.platform }}
+        run: |
+          if [ "${{ matrix.platform }}" == "android" ]; then
+            flutter build apk --release --split-per-abi
+          elif [ "${{ matrix.platform }}" == "ios" ]; then
+            flutter build ipa --release
+          elif [ "${{ matrix.platform }}" == "windows" ]; then
+            flutter build windows --release
+          fi
+
+      # Langkah 5: Simpan hasil build sebagai artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.platform }}-build
+          path: |
+            build/app/outputs/flutter-apk/*.apk # Android
+            build/ios/ipa/*.ipa # iOS
+            build/windows/runner/Release/*.exe # Windows
