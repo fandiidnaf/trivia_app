@@ -32,18 +32,22 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      # Langkah 4: Build berdasarkan platform
+      # Langkah 4: Run test
+      - name: Run The Tests
+        run: flutter test
+
+      # Langkah 5: Build berdasarkan platform
       - name: Build for ${{ matrix.platform }}
         run: |
           if [ "${{ matrix.platform }}" == "android" ]; then
-            flutter build apk --release --split-per-abi
+            flutter build apk --release
           elif [ "${{ matrix.platform }}" == "ios" ]; then
             flutter build ipa --release
           elif [ "${{ matrix.platform }}" == "windows" ]; then
             flutter build windows --release
-          fi
+          
 
-      # Langkah 5: Simpan hasil build sebagai artifacts
+      # Langkah 6: Simpan hasil build sebagai artifacts
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
